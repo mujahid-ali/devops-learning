@@ -1,0 +1,22 @@
+# Lab 03 only. A naked Pod is intentional here so you can see that deleting it does not recreate it.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-pod
+  namespace: playground
+  labels:
+    app: web-pod
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.27-alpine
+      ports:
+        - name: http
+          containerPort: 80
+      resources:
+        requests:
+          cpu: 25m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi

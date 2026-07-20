@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: broken-image
+  namespace: playground
+spec:
+  containers:
+    - name: nginx
+      image: nginx:this-tag-does-not-exist

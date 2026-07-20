@@ -1,0 +1,45 @@
+services:
+  control-plane:
+    build:
+      context: ./control-plane
+    environment:
+      PLATFORM_ENV: ${PLATFORM_ENV:-local}
+      PLATFORM_LOG_LEVEL: ${PLATFORM_LOG_LEVEL:-INFO}
+      POSTGRES_DSN: postgresql://${POSTGRES_USER:-forgepaas}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-forgepaas}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-forgepaas}
+      POSTGRES_USER: ${POSTGRES_USER:-forgepaas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - redis-data:/data
+
+volumes:
+  postgres-data:
+  redis-data:
